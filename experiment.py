@@ -25,9 +25,10 @@ class Experiment:
     def report(self):
         pred = np.array(list(self.predict_pairwise_ranks()))
         true, pred = pred[:,0], pred[:,1]
-        out = {}
         out = self.parameters.copy()
         out['x_star'] = self.data.x_star.flatten().tolist()
+        out['points'] = self.data.points.tolist()
+        out['ranks'] = self.data.rank_mat.tolist()
         out['x_hat'] = self.model.current_x_hat.flatten().tolist()
         out['accuracy'] = accuracy_score(true, pred)
         if os.path.exists('Results/main.json'):
