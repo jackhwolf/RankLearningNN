@@ -1,6 +1,8 @@
 import warnings
 warnings.filterwarnings('ignore')
 import yaml
+import os
+import json
 import numpy as np
 from sklearn.metrics import accuracy_score
 from data import Data
@@ -11,6 +13,7 @@ class Experiment:
     def __init__(self, input_filename):
         with open(input_filename) as f:
             self.parameters = yaml.load(f, Loader=yaml.FullLoader)
+        os.makedirs('Results/', exist_ok=True)
         self.data = Data(**self.parameters)
         self.model = RankLearner(**self.parameters)
 
@@ -27,6 +30,12 @@ class Experiment:
         out['x_star'] = self.data.x_star.flatten().tolist()
         out['x_hat'] = self.model.current_x_hat.flatten().tolist()
         out['accuracy'] = accuracy_score(true, pred)
+        if os.path.exists('Results/main.json'):
+            res = json.loads(open('Results/main.json', 'r').read())
+        else:
+            res = []
+        res.append(out)
+        open('Results/main.json', 'w').write(json.dumps(res))
         return out
 
     def predict_pairwise_ranks(self):
