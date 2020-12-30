@@ -38,6 +38,4 @@ if __name__ == "__main__":
     import sys
     e = Experiment(sys.argv[1])
     e.learn_pairwise_ranks()
-    print(e.model.current_x_hat)
-    print(e.data.x_star)
     print(e.report())
