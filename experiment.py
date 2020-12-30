@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 from data import Data
 from model import RankLearner
+from grapher import Graph
 
 class Experiment:
 
@@ -31,6 +32,7 @@ class Experiment:
         out['ranks'] = self.data.rank_mat.tolist()
         out['x_hat'] = self.model.current_x_hat.flatten().tolist()
         out['accuracy'] = accuracy_score(true, pred)
+        out.update(Graph(out))
         if os.path.exists('Results/main.json'):
             res = json.loads(open('Results/main.json', 'r').read())
         else:
