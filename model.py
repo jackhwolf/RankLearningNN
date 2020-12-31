@@ -1,12 +1,21 @@
 import torch
+from numpy.random import uniform as np_uni
 from torch.autograd import Variable
+from hingeloss import hingeloss
 
 class RankLearner:
 
-    def __init__(self, D=2, criterion='MSELoss', lr=0.01, weight_decay=1e-5, optimizer='SGD', epochs=1000, **kw):
-        self.x_hat_fc = Variable((torch.randn(1, D).type(torch.FloatTensor)*2)-1, requires_grad=True)
+    def __init__(self, D=2, criterion='MSELoss', lr=0.01, \
+                                weight_decay=1e-5, optimizer='SGD', epochs=1000, **kw):
+        self.x_hat_fc = Variable(torch.Tensor(np_uni(-1, 1, (1,D))).type(torch.FloatTensor), requires_grad=True)
         self.D = D
-        self.criterion = getattr(torch.nn, criterion)()
+        try:
+            self.criterion = getattr(torch.nn, criterion)()
+        except:
+            if criterion == 'Hinge':
+                self.criterion = hingeloss()
+            else:
+                raise ValueError("Invalid criterion: ", criterion)
         self.lr = lr 
         self.weight_decay = weight_decay
         opt = getattr(torch.optim, optimizer)

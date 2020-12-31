@@ -14,6 +14,7 @@ class Data:
 
     def iterator(self, training_iterations=1):
         combos = [(i,j) for i,j in combinations(range(self.N), 2)]
+        np.random.shuffle(combos)
         for b in range(training_iterations):
             for i, j in combos:
                 yield self.points[i,:], self.points[j,:], self.rank_mat[i,j]
