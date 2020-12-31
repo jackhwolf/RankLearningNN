@@ -4,3 +4,4 @@ venv/
 .vscode/
 Results/
 dask-worker-space/
+input_files/*
