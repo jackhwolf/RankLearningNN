@@ -10,13 +10,13 @@ if __name__ == '__main__':
     cli = Client(dask_addr)
 
     # upload files so workers can import
-    time.sleep(3)
+#     time.sleep(2)
     cli.upload_file("data.py")
     cli.upload_file("hingeloss.py")
     cli.upload_file("model.py")
     cli.upload_file("grapher.py")
     cli.upload_file("experiment.py")
-    time.sleep(3)
+#     time.sleep(2)
     
     from experiment import Experiment
     

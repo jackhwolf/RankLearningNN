@@ -12,10 +12,8 @@ class RankLearner:
         try:
             self.criterion = getattr(torch.nn, criterion)()
         except:
-            if criterion == 'Hinge':
-                self.criterion = hingeloss()
-            else:
-                raise ValueError("Invalid criterion: ", criterion)
+            cmap = {'Hinge': hingeloss()}
+            self.criterion = cmap[criterion]
         self.lr = lr 
         self.weight_decay = weight_decay
         opt = getattr(torch.optim, optimizer)
@@ -27,7 +25,7 @@ class RankLearner:
         true_rank_ij = self.to_var(true_rank_ij)
         for i in range(self.epochs):
             pred_rank_ij = self.forward(point_i, point_j)
-            loss = self.criterion(pred_rank_ij, true_rank_ij)
+            loss = self.criterion(pred_rank_ij, true_rank_ij).sum()
             loss.backward()
             self.optimizer.step()
             self.optimizer.zero_grad()
@@ -38,6 +36,7 @@ class RankLearner:
         dist_i = self.forward_one(point_i)
         dist_j = self.forward_one(point_j)
         pred_rank_ij = dist_j - dist_i
+        # pred_rank_ij = (dist_j - dist_i).sign()  # grad(sign)=0, so x_hat will never update
         return pred_rank_ij
 
     def forward_one(self, point):
@@ -52,4 +51,4 @@ class RankLearner:
         return self.x_hat_fc.detach().numpy()
 
     def to_var(self, foo):
-        return Variable(torch.FloatTensor([foo]))
+        return Variable(torch.FloatTensor(foo))

@@ -10,6 +10,7 @@ from distributed import worker_client
 from data import Data
 from model import RankLearner
 from grapher import Graph
+from time import time
 
 class Experiment:
     
@@ -43,17 +44,15 @@ class SingleExperiment:
         self.model = RankLearner(**self.parameters)
         
     def run(self):
+        print(self.parameters)
         self.learn_pairwise_ranks()
         return self.report()
 
     def learn_pairwise_ranks(self):
         print("X*        : ", self.data.x_star)
         print("Initial X^: ", self.model.current_x_hat)
-        ti = self.parameters['training_iterations']
-        for t in range(ti):
-            for point_i, point_j, rank_ij in self.data.iterator(1):
-                self.model.learn_pairwise_rank(point_i, point_j, rank_ij)
-            print(f"Current X^ @ {t}/{ti}: ", self.model.current_x_hat)
+        for point_i, point_j, rank_ij in self.data.training_iterator():
+            self.model.learn_pairwise_rank(point_i, point_j, rank_ij)
 
     def report(self):
         os.makedirs('Results', exist_ok=True)
@@ -63,15 +62,16 @@ class SingleExperiment:
         out['points'] = self.data.points.tolist()
         out['ranks'] = self.data.rank_mat.tolist()
         out['accuracy'] = self.predict_pairwise_ranks()
+        out['timestamp'] = int(time())
         out.update(Graph(out))
         return out
 
     def predict_pairwise_ranks(self):
         pred = []
-        for point_i, point_j, true_rank_ij in self.data.iterator(1):
+        for point_i, point_j, true_rank_ij in self.data.prediction_iterator():
             pred_rank_ij = self.model.predict_pairwise_rank(point_i, point_j)
-            pred.append([true_rank_ij, pred_rank_ij])
+            pred.append([true_rank_ij[0], pred_rank_ij])
         pred = np.array(pred)
         true, pred = pred[:,0], pred[:,1]
-        return accuracy_score(true, pred)
+        return np.round(accuracy_score(true, pred), 3)
 
