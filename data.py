@@ -5,13 +5,22 @@ from itertools import combinations
 
 class Data:
 
-    def __init__(self, N=100, D=2, training_iterations=1, batch_size=4, **kw):
+    def __init__(self, beer=False, N=100, D=2, training_iterations=1, batch_size=4, **kw):
+        self.beer = beer
         self.N = N
-        self.D = D
+        if beer:
+            self.points = np.load('beer-data/beers_processed.npy')
+            self.D = self.points.shape[1]
+            mask = np.array([False] * self.points.shape[0])
+            mask[:N] = True
+            np.random.shuffle(mask)
+            self.points = self.points[mask,:]
+        else:
+            self.points = np.random.uniform(-1, 1, size=(N, D))
+            self.D = D
         self.training_iterations = training_iterations
         self.batch_size = batch_size
-        self.points = np.random.uniform(-1, 1, size=(N, D))
-        self.x_star = np.random.uniform(-1, 1, size=(1, D))
+        self.x_star = np.random.uniform(-1, 1, size=(1, self.D))
         self.rank_mat = self.build_rank_mat()
 
     def training_iterator(self):
